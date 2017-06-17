@@ -446,12 +446,12 @@ Custom property | Description | Default
         e.preventDefault();
         e.stopPropagation();
 
-        var target = e.target;
+        var target = Polymer.dom(e).rootTarget;
         if (target.dataset.source === 'add') {
           this.$.editor.opened = false;
         } else if (target.dataset.source) {
           // target.dataset.source
-          var model = this.$.repeater.modelForElement(e.target);
+          var model = this.$.repeater.modelForElement(target);
           model.set('item.editorEnabled', false);
         }
       },
@@ -460,12 +460,12 @@ Custom property | Description | Default
         e.preventDefault();
         e.stopPropagation();
 
-        var target = e.target;
+        var target = Polymer.dom(e).rootTarget;
         if (target.dataset.source === 'add') {
           this.$.editor.opened = false;
           this._addNewSet(e.detail);
         } else if (target.dataset.source) {
-          var model = this.$.repeater.modelForElement(e.target);
+          var model = this.$.repeater.modelForElement(target);
           model.set('item.editorEnabled', false);
           this._updateSet(e.detail, target.dataset.source);
         }
