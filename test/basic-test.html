@@ -30,14 +30,139 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </test-fixture>
 
     <script>
+    function getDb() {
+      return new PouchDB('headers-sets');
+    }
+
+    function createSetRecord(name, value) {
+      name = name || 'test-name';
+      value = value || 'test-value';
+      var obj = {
+        name: 'test',
+        headers: 'test',
+        created: Date.now(),
+        order: 0
+      };
+      var db = getDb();
+      return db.post(obj)
+      .then((insert) => {
+        obj._id = insert.id;
+        obj._rev = insert.rev;
+        return obj;
+      });
+    }
+
+    function fire(name, detail, node) {
+      var event = new CustomEvent(name, {
+        bubbles: true,
+        composed: true,
+        detail: detail
+      });
+      (node || document).dispatchEvent(event);
+      return event;
+    }
+
     /* global suite, test, fixture, assert */
     suite('basic', function() {
       var element;
-      setup(function() {
-        element = fixture('basic');
+      var createdObject;
+
+      suiteSetup(function() {
+        return createSetRecord()
+        .then((obj) => {
+          createdObject = obj;
+        });
       });
-      test('`headers-sets-selector` should be initialized', function() {
-        assert.equal(element.isAttached, true, 'element.isAttached equals true');
+
+      suiteTeardown(function() {
+        var db = getDb();
+        return db.destroy();
+      });
+
+      setup(function(done) {
+        element = fixture('basic');
+        setTimeout(function() {
+          // The element initializes database and gets all records.
+          done();
+        }, 300);
+      });
+
+      suite('initialization', function() {
+        test('restores user data', function() {
+          return element._restoreUserData()
+          .then(() => {
+            assert.lengthOf(element.customSets, 1);
+          });
+        });
+
+        test('computes browser default headers', function() {
+          assert.typeOf(element.headersDefaults, 'string');
+        });
+
+        test('Available sets has 2 elements', function() {
+          assert.lengthOf(element.availableSets, 2);
+        });
+
+        test('Default value does not have content type', function() {
+          assert.equal(element.headersDefaults.toLowerCase().indexOf('content-type'), -1);
+        });
+
+        test('isPayload adds content type to default headers', function() {
+          element.isPayload = true;
+          assert.notEqual(element.headersDefaults.toLowerCase().indexOf('content-type'), -1);
+        });
+      });
+
+      suite('events', function() {
+        test('custom-headers-set-created adds custom set to the list', function(done) {
+          var event = fire('custom-headers-set-created', {
+            id: createdObject._id,
+            rev: createdObject._rev,
+            name: createdObject.name,
+            content: createdObject.headers
+          });
+          setTimeout(() => {
+            assert.lengthOf(element.customSets, 2); // restored and added
+            done();
+          }, 100);
+        });
+
+        test('custom-headers-set-created adds custom set to the list', function(done) {
+          setTimeout(() => {
+            assert.lengthOf(element.customSets, 1, 'Has restored item');
+            var event = fire('custom-headers-set-deleted', {
+              id: createdObject._id
+            });
+            assert.lengthOf(element.customSets, 0, 'Has empty array');
+            done();
+          }, 100);
+        });
+
+        test('saves new set', function(done) {
+          const values = {
+            name: 'test-add',
+            value: 'test-add-value'
+          };
+
+          element.addEventListener('custom-headers-set-created', function(e) {
+            assert.equal(e.detail.content, values.value, 'Content equals set value');
+            assert.equal(e.detail.name, values.name, 'Name equals set name');
+            assert.lengthOf(element.customSets, 2, 'Has 2 custom sets');
+            done();
+          });
+          element._addNewSet(values);
+        });
+
+        test('custom-headers-set-deleted event is fired', function(done) {
+
+          element.addEventListener('custom-headers-set-deleted', function(e) {
+            assert.equal(e.detail.id, createdObject._id);
+            assert.lengthOf(element.customSets, 1, 'Has 1 custom sets');
+            done();
+          });
+          element.__deleteSet(createdObject._id, createdObject._rev);
+        });
+
       });
     });
     </script>
