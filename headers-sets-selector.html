@@ -279,7 +279,7 @@ Custom property | Description | Default
       _restoreUserData: function() {
         var context = this;
         var db = this._getDb();
-        db.allDocs({
+        return db.allDocs({
           // jscs:disable
           include_docs: true
           // jscs:enable
@@ -341,18 +341,23 @@ Custom property | Description | Default
         this.$.editor.opened = true;
         this.$.addEditor.refresh();
       },
-
+      // Handler for set delete button
       _deleteSet: function(e) {
         var model = this.$.repeater.modelForElement(e.target);
         var id = model.get('item._id');
         var rev = model.get('item._rev');
+        this.__deleteSet(id, rev);
+      },
+      // Deletes a set from the datastore.
+      __deleteSet: function(id, rev) {
         var db = this._getDb();
         db.remove(id, rev)
         .then(function(resp) {
           if (!resp.ok) {
             this.$.errorToast.text = resp.message;
             this.$.errorToast.opened = true;
-            return;
+            console.error(resp);
+            throw new Error('Unable to delete the set.');
           }
           var index = this.customSets.findIndex(function(i) {
             return i._id === id;
@@ -363,7 +368,7 @@ Custom property | Description | Default
           });
         }.bind(this));
       },
-
+      // Handler for set's use button.
       _useSet: function(e) {
         var i = this.$.repeater.indexForElement(e.target);
         var set = this.availableSets[i];
@@ -493,7 +498,7 @@ Custom property | Description | Default
         .catch(function(cause) {
           this.$.errorToast.text = 'Unable to save set in the data store. See console for errors';
           this.$.errorToast.opened = true;
-          console.error(cause);
+          throw cause;
         });
       },
 
