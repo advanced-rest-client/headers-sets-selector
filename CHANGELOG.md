@@ -1,3 +1,13 @@
+<a name="0.1.2"></a>
+## [0.1.2](https://github.com/advanced-rest-client/headers-sets-selector/compare/0.1.1...v0.1.2) (2017-06-17)
+
+
+### Fix
+
+* Fixed event recognition issues when shadow root is on. ([ab779fc0d1caa8c49d3d3901f89147c6e9d6054d](https://github.com/advanced-rest-client/headers-sets-selector/commit/ab779fc0d1caa8c49d3d3901f89147c6e9d6054d))
+
+
+
 <a name="0.1.1"></a>
 ## 0.1.1 (2017-06-17)
 
