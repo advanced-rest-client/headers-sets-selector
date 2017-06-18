@@ -68,7 +68,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       var createdObject;
 
       suiteSetup(function() {
-        return createSetRecord()
+        return getDb().destroy()
+        .then(() => createSetRecord())
         .then((obj) => {
           createdObject = obj;
         });
