@@ -331,7 +331,7 @@ Custom property | Description | Default
       },
 
       _editSet: function(e) {
-        var model = this.$.repeater.modelForElement(e.target);
+        var model = this.$.repeater.modelForElement(Polymer.dom(e).rootTarget);
         model.set('item.editorEnabled', true);
       },
       /**
@@ -343,7 +343,7 @@ Custom property | Description | Default
       },
       // Handler for set delete button
       _deleteSet: function(e) {
-        var model = this.$.repeater.modelForElement(e.target);
+        var model = this.$.repeater.modelForElement(Polymer.dom(e).rootTarget);
         var id = model.get('item._id');
         var rev = model.get('item._rev');
         this.__deleteSet(id, rev);
@@ -370,7 +370,7 @@ Custom property | Description | Default
       },
       // Handler for set's use button.
       _useSet: function(e) {
-        var i = this.$.repeater.indexForElement(e.target);
+        var i = this.$.repeater.indexForElement(Polymer.dom(e).rootTarget);
         var set = this.availableSets[i];
         this.fire('headers-set-selected', {
           set: set.headers,
@@ -411,7 +411,7 @@ Custom property | Description | Default
       },
 
       _deleteddEventHandler: function(e) {
-        if (e.target === this) {
+        if (Polymer.dom(e).rootTarget === this) {
           return;
         }
         var id = e.detail.id;
@@ -431,7 +431,7 @@ Custom property | Description | Default
       },
 
       _handleUpdateSet: function(e) {
-        if (e.target === this) {
+        if (Polymer.dom(e).rootTarget === this) {
           return Promise.resolve();
         }
         var id = e.detail.id;
